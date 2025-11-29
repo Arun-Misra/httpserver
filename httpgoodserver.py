@@ -15,6 +15,17 @@ connection.bind((HOST, PORT))
 connection.listen(5)
 
 print(f"Listening to port {PORT}")
+
+def response_build(http_status, content, content_type='text/html'):
+    response= (
+        f"HTTP/1.1 {http_status}\r\n"
+        f"Content-Type: {content_type}; charset=utf-8\r\n"
+        f"Content-Length: {len(content.encode())}\r\n"
+        "\r\n"
+        f"{content}"
+    )
+    return response
+
 while True:
     socket_connect, address = connection.accept()
     req =  socket_connect.recv(1000).decode()
@@ -30,23 +41,12 @@ while True:
         if path == '/':
             with open("ff.html", "r") as fin:
                 content = fin.read()
-            response = (
-                "HTTP/1.1 200 OK\r\n"
-                "Content-Type: text/html; charset=utf-8\r\n"
-                f"Content-Length: {len(content.encode())}\r\n"
-                "\r\n"
-                f"{content}"
-            )
+            response = response_build("200 OK", content)
+            
         elif path.startswith('/echo'):
-            content = re.findall("[=][.+]", path)
-            print(content)
-            response = (
-                "HTTP/1.1 200 OK\r\n"
-                "Content-Type: text/html; charset=utf-8\r\n"
-                f"Content-Length: {len(content.encode())}\r\n"
-                "\r\n"
-                f"{content}"
-            )
+            check = re.findall("[=](.+)", path)
+            content = check[0]
+            response = response_build("200 OK", content)
             
     else:
         response = 'HTTP/1.1 405 Method Not Allowed\r\n\r\nAllow: GET'
