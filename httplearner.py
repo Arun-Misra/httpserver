@@ -2,7 +2,7 @@ import socket
 import re
 
 mysock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-mysock.connect(('127.0.0.1', 9000))
+mysock.connect(('127.0.0.1', 8080))
 get_demo = 'GET https//127.0.0.1 HTTP/1.1\r\n\r\n'.encode()
 mysock.send(get_demo)
 
