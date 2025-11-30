@@ -47,34 +47,33 @@ while True:
     body = "\r\n".join(lines[i+1:])
 
     
-    if  http_method == 'GET'and path == '/' :
-        # with open("ff.html", "r") as fin:
-        #     content = fin.read()
-        response = response_build("200 OK", "<h1>WELCOME TO MY SERVER</h1>")
+    if http_method == 'GET':
+        if path == '/':
+            # with open("ff.html", "r") as fin:
+            # content = fin.read()
+            response = response_build("200 OK", "<h1>WELCOME TO MY SERVER</h1>")
+        elif path.startswith('/echo'):
+            check = re.findall("[=](.+)", path)
+            content = check[0]
+            response = response_build("200 OK", content)
+        elif path == '/data' or path == '/data/':
+            response = response_build("200 OK", list(json_data_store.values()), "application/json")    
+        elif path.startswith('/data/'):
+            try:
+                item = int(path.split("/")[-1])
+                if item in json_data_store:
+                    response = response_build("200 OK", json_data_store[item], "application/json")
+                else:
+                    response = response_build("404 Not Found", "Item not found")
+            except:
+                response = response_build("400 Bad Request", "Invalid ID")
 
-    elif http_method == 'GET' and path.startswith('/echo'):
-        check = re.findall("[=](.+)", path)
-        content = check[0]
-        response = response_build("200 OK", content)
-        
     elif http_method == 'POST' and path == '/data':
         object = json.loads(body)
         object["id"] = id
         json_data_store[id] = object
         id+=1
         response = response_build("200 OK", {"status": "success", "id": object["id"]}, "application/json")
-    elif http_method == 'GET' and path == '/data':
-        response = response_build("200 OK", list(json_data_store.values()), "application/json")    
-    
-    elif http_method == 'GET' and path.startswith('/data/'):
-        try:
-            item = int(path.split("/")[-1])
-            if item in json_data_store:
-                response = response_build("200 OK", json_data_store[item], "application/json")
-            else:
-                response = response_build("404 Not Found", "Item not found")
-        except:
-            response = response_build("400 Bad Request", "Invalid ID")
     
     elif http_method == 'DELETE' and path.startswith('/data/'):
         try:
