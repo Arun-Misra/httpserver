@@ -63,8 +63,30 @@ while True:
         json_data_store[id] = object
         id+=1
         response = response_build("200 OK", {"status": "success", "id": object["id"]}, "application/json")
-            
+    elif http_method == 'GET' and path == '/data':
+        response = response_build("200 OK", list(json_data_store.values()), "application/json")    
+    
+    elif http_method == 'GET' and path.startswith('/data/'):
+        try:
+            item = int(path.split("/")[-1])
+            if item in json_data_store:
+                response = response_build("200 OK", json_data_store[item], "application/json")
+            else:
+                response = response_build("404 Not Found", "Item not found")
+        except:
+            response = response_build("400 Bad Request", "Invalid ID")
+    
+    elif http_method == 'DELETE' and path.startswith('/data/'):
+        try:
+            item = int(path.split("/")[-1])
+            if item in json_data_store:
+                json_data_store.pop(item)
+                response = response_build("200 OK",{"status":"deleted"}, "application/json")
+            else:
+                response = response_build("404 Not Found", "Item not found")
+        except:
+            response = response_build("400 Bad Request", "Invalid ID")
     else:
-        response = 'HTTP/1.1 405 Method Not Allowed\r\n\r\nAllow: GET'
+        response = response_build("404 Not Found", "Route not found")
     socket_connect.sendall(response)
     socket_connect.close()
