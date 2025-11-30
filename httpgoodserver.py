@@ -7,7 +7,7 @@ HOST = "localhost"
 PORT = 8080
 
 json_data_store = {}
-id = 1
+id_counter = 1
 
 # 1. Socket establishment
 connection = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -61,7 +61,6 @@ while True:
         if not chunk:
             break
         body_data += chunk
-    
     body = body_data.decode() if body_data else ""
 
      
@@ -96,15 +95,15 @@ while True:
             except:
                 response = response_build("400 Bad Request", {"error": "Invalid ID"}, "application/json")
                 status = "400 Bad Request"
+    
     elif http_method == 'POST' and path == '/data':
         try:
             if not body:
                 raise ValueError("Empty body")
             object = json.loads(body)
-            object["id"] = id
-            json_data_store[id] = object
-            id+=1
-            response = response_build("200 OK", {"status": "success", "id": object["id"]}, "application/json")
+            json_data_store[id_counter] = object
+            response = response_build("200 OK", {"status": "success", "index": id_counter}, "application/json")
+            id_counter+=1
             status = "200 OK"
         except json.JSONDecodeError as e:
             print(f"[ERROR] JSON Decode Error: {e}")
